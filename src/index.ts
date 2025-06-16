@@ -4,8 +4,6 @@ import msgCommands from "./msgCommandHandler";
 
 config();
 
-const PREFIX = "kk";
-
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -14,19 +12,21 @@ const client = new Client({
     ],
 });
 
+const prefix = "kk";
+
 client.once(Events.ClientReady, () => {
     console.log(`✅ Logged in as ${client.user?.tag}`);
 });
 
 client.on(Events.MessageCreate, async (message: Message) => {
-    if (message.author.bot || !message.reference || !message.content.startsWith(PREFIX)) return;
+    if (message.author.bot || !message.content.startsWith(prefix)) return;
 
-    const args = message.content.slice(PREFIX.length).trim().split(/ +/);
+    const args = message.content.slice(prefix.length).trim().split(/ +/);
     const trigger = args.shift()?.toLowerCase();
 
     if (!trigger) return;
-    const command = msgCommands.get(trigger);
 
+    const command = msgCommands.get(trigger);
     if (!command) {
         console.warn(`[ WARN ] Unknown command: ${trigger}`);
         return;
@@ -35,7 +35,7 @@ client.on(Events.MessageCreate, async (message: Message) => {
     try {
         await command.execute(message, args.join(" "));
     } catch (err) {
-        console.error(`[ ERROR ] Failed to execute command "${trigger}":`, err);
+        console.error(`[ ERROR ] Command "${trigger}" failed:`, err);
         await message.reply("There was an error executing that command.");
     }
 });

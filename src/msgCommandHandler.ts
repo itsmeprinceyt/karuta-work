@@ -8,28 +8,24 @@ interface MessageCommand {
 }
 
 const msgCommands = new Collection<string, MessageCommand>();
+const commandPath = join(__dirname, "commands");
 
-const commandFolders = ["commands"];
+const commandFiles = readdirSync(commandPath).filter(
+    (file) => file.endsWith(".ts") || file.endsWith(".js")
+);
 
-for (const folder of commandFolders) {
-    const commandPath = join(__dirname, folder);
-    const commandFiles = readdirSync(commandPath).filter(
-        (file) => file.endsWith(".ts") || file.endsWith(".js")
-    );
+for (const file of commandFiles) {
+    const commandModule = require(`${commandPath}/${file}`);
+    const command: MessageCommand = commandModule.default;
 
-    for (const file of commandFiles) {
-        const commandModule = require(`${commandPath}/${file}`);
-        const command: MessageCommand = commandModule.default;
-
-        if (command && Array.isArray(command.triggers)) {
-            for (const trigger of command.triggers) {
-                msgCommands.set(trigger, command);
-            }
-        } else {
-            console.warn(`[ ERROR ] Message command ${file} in ${folder} is missing "triggers" or "execute"!`);
+    if (command && Array.isArray(command.triggers)) {
+        for (const trigger of command.triggers) {
+            msgCommands.set(trigger.toLowerCase(), command);
         }
+    } else {
+        console.warn(`[ WARN ] Skipping ${file}: Missing triggers or execute`);
     }
 }
 
-console.log(`[ INFO ] Registering Message commands. | Commands: ${msgCommands.size}`);
+console.log(`[ INFO ] Loaded ${msgCommands.size} message command(s).`);
 export default msgCommands;
