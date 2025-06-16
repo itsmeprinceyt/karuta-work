@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.GIF_NAME = exports.GIF_LOCATION = exports.Creator = exports.DISCORD_BOT_INVITE_LINK = exports.DiscordProfileLink = exports.BotName = exports.YouTubeLink = exports.Karuta = void 0;
+exports.Karuta = "646937666251915264";
+exports.YouTubeLink = "https://www.youtube.com/@itsmeprinceyt";
+exports.BotName = "Karuta Work";
+exports.DiscordProfileLink = "https://media.discordapp.net/attachments/1336322293437038602/1384298329722060890/logo.jpg";
+exports.DISCORD_BOT_INVITE_LINK = "https://discord.com/oauth2/authorize?client_id=1384236212092538880&permissions=2147601472&integration_type=0&scope=bot";
+exports.Creator = "310672946316181514";
+exports.GIF_LOCATION = "../../public/how-to-use.gif";
+exports.GIF_NAME = "how-to-use.gif";

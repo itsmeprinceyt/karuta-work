@@ -1,5 +1,6 @@
 import { EmbedBuilder } from "discord.js";
 import { COLOR_TRUE, GOLDEN_EMBED } from "./Colors";
+import { BotName, DiscordProfileLink } from "./utils";
 
 export function AllCardsHealthyEmbed(): EmbedBuilder {
     return new EmbedBuilder()
@@ -10,6 +11,10 @@ export function AllCardsHealthyEmbed(): EmbedBuilder {
 export function JobBoardSummary(healthyCount: number, injuredCount: number): EmbedBuilder {
     return new EmbedBuilder()
         .setColor(COLOR_TRUE)
+        .setAuthor({
+            name: BotName,
+            iconURL: DiscordProfileLink})
+        .setThumbnail(DiscordProfileLink)
         .setDescription(
             `Here's the current status of your Job Board:\n\n` +
             `✅ **Healthy ${healthyCount === 1 ? "Card" : "Cards"}:** ${healthyCount}\n` +

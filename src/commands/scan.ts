@@ -1,8 +1,15 @@
-import { Message, TextChannel, AttachmentBuilder, EmbedBuilder } from "discord.js";
+import { Message, TextChannel, AttachmentBuilder } from "discord.js";
 import path from "path";
 import { Karuta } from '../utils/utils';
-import { AllCardsHealthyEmbed, EmptyJobBoard, NoJobBoardFound, NotTriggeredByYou, NoCardsFound, JobBoardSummary } from "../utils/karuta-work";
-
+import {
+    AllCardsHealthyEmbed,
+    EmptyJobBoard,
+    NoJobBoardFound,
+    NotTriggeredByYou,
+    NoCardsFound,
+    JobBoardSummary
+} from "../utils/karuta-work";
+import { YouTubePromoEmbed } from "../utils/ytPromo";
 
 const jobBoardHealthyCards: { position: string; name: string }[] = [];
 
@@ -14,20 +21,23 @@ export default {
         if (!repliedTo) return;
         if (!repliedTo.author.bot || repliedTo.author.id !== Karuta) return;
 
-        let triggeredByUser: boolean = false;
-
+        let triggeredByUser = false;
         if (repliedTo.reference) {
             const originalMessage = await message.channel.messages.fetch(repliedTo.reference.messageId!).catch(() => null);
-            if (originalMessage && originalMessage.author.id === message.author.id) {
+            if (originalMessage?.author.id === message.author.id) {
                 triggeredByUser = true;
             }
         }
 
+        const { embed: ytEmbed, button: ytButton } = YouTubePromoEmbed();
+
         if (!triggeredByUser) {
-            await message.reply({ embeds: [NotTriggeredByYou()] });
+            await message.reply({
+                embeds: [NotTriggeredByYou(), ytEmbed],
+                components: [ytButton],
+            });
             return;
         }
-
 
         const embed = repliedTo.embeds[0];
         if (!embed?.description) return;
@@ -36,6 +46,7 @@ export default {
             jobBoardHealthyCards.length = 0;
             const lines = embed.description.split("\n").map((line) => line.trim()).filter(Boolean);
             let foundJobBoard = false;
+
             for (const line of lines) {
                 const match = line.match(/^(🇦|🇧|🇨|🇩|🇪)\s(.+?)\s·\s\*\*(\d+)\*\*\sEffort\s·\s`(Healthy|Injured)`/);
                 if (match) {
@@ -46,35 +57,48 @@ export default {
                     }
                 }
             }
+
             if (!foundJobBoard) {
                 const gifPath = path.join(__dirname, "../public/GIF/silly-cat-silly-car.gif");
                 const gif = new AttachmentBuilder(gifPath);
                 await message.reply({
-                    embeds: [NoJobBoardFound()],
+                    embeds: [NoJobBoardFound(), ytEmbed],
+                    components: [ytButton],
                     files: [gif]
                 });
                 return;
             }
+
             if (jobBoardHealthyCards.length === 0) {
-                const hasCards = lines.some(line => line.match(/^(🇦|🇧|🇨|🇩|🇪)\s(.+?)\s·\s\*\*(\d+)\*\*\sEffort\s·\s`(Injured)`/));
-                if (hasCards) { } else {
+                const hasCards = lines.some(line =>
+                    line.match(/^(🇦|🇧|🇨|🇩|🇪)\s(.+?)\s·\s\*\*(\d+)\*\*\sEffort\s·\s`Injured`/)
+                );
+                if (!hasCards) {
                     await message.reply({
-                        embeds: [EmptyJobBoard()]
+                        embeds: [EmptyJobBoard(), ytEmbed],
+                        components: [ytButton]
                     });
                     return;
                 }
-
             }
 
-            const count = jobBoardHealthyCards.length;
-            if (count === 5) {
-                await message.reply({ embeds: [AllCardsHealthyEmbed()] });
+            const healthyCount = jobBoardHealthyCards.length;
+            const injuredCount = lines.filter(line =>
+                line.match(/^(🇦|🇧|🇨|🇩|🇪)\s(.+?)\s·\s\*\*(\d+)\*\*\sEffort\s·\s`Injured`/)
+            ).length;
+
+            if (healthyCount === 5) {
+                await message.reply({
+                    embeds: [AllCardsHealthyEmbed(), ytEmbed],
+                    components: [ytButton]
+                });
                 return;
             }
-            const healthyCount: number = jobBoardHealthyCards.length;
-            const injuredCount: number = lines.filter(line => line.match(/^(🇦|🇧|🇨|🇩|🇪)\s(.+?)\s·\s\*\*(\d+)\*\*\sEffort\s·\s`Injured`/)).length;
 
-            await message.reply({ embeds: [JobBoardSummary(healthyCount, injuredCount)] });
+            await message.reply({
+                embeds: [JobBoardSummary(healthyCount, injuredCount), ytEmbed],
+                components: [ytButton]
+            });
         }
 
         if (message.content.startsWith("kkwork")) {
@@ -86,7 +110,10 @@ export default {
             );
 
             if (availableCards.length === 0) {
-                await message.reply({ embeds: [NoCardsFound()] });
+                await message.reply({
+                    embeds: [NoCardsFound(), ytEmbed],
+                    components: [ytButton]
+                });
                 return;
             }
 
@@ -109,17 +136,18 @@ export default {
             for (const { code, name } of availableCards) {
                 if (jobBoardHealthyCards.some((card) => name.startsWith(card.name))) continue;
                 if (labelIndex >= availableLabels.length) break;
-                const label = availableLabels[labelIndex];
-                labelIndex++;
 
+                const label = availableLabels[labelIndex++];
                 if (message.channel.isTextBased()) {
                     await (message.channel as TextChannel).send(`kjw ${label.toLowerCase()} ${code}`);
                 }
             }
 
-
             if (labelIndex === 0) {
-                await message.reply({ embeds: [AllCardsHealthyEmbed()] });
+                await message.reply({
+                    embeds: [AllCardsHealthyEmbed(), ytEmbed],
+                    components: [ytButton]
+                });
             }
         }
     },
