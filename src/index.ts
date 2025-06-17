@@ -21,7 +21,9 @@ client.once(Events.ClientReady, () => {
 const cooldowns = new Map<string, { lastUsed: number, penalty: number }>();
 
 client.on(Events.MessageCreate, async (message: Message) => {
-    if (message.author.bot || !message.content.startsWith(prefix)) return;
+    if (message.author.bot) return;
+
+    if (message.content.slice(0, prefix.length).toLowerCase() !== prefix) return;
 
     const args = message.content.slice(prefix.length).trim().split(/ +/);
     const trigger = args.shift()?.toLowerCase();

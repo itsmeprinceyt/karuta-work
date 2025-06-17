@@ -19,6 +19,7 @@ exports.default = {
             return;
         if (!repliedTo.author.bot || repliedTo.author.id !== utils_1.Karuta)
             return;
+        const content = message.content.toLowerCase();
         let triggeredByUser = false;
         if (repliedTo.reference) {
             const originalMessage = await message.channel.messages.fetch(repliedTo.reference.messageId).catch(() => null);
@@ -37,7 +38,7 @@ exports.default = {
         const embed = repliedTo.embeds[0];
         if (!embed?.description)
             return;
-        if (message.content.startsWith("kkscan")) {
+        if (content.startsWith("kkscan")) {
             jobBoardHealthyCards.length = 0;
             const lines = embed.description.split("\n").map((line) => line.trim()).filter(Boolean);
             let foundJobBoard = false;
@@ -85,7 +86,7 @@ exports.default = {
                 components: [ytButton]
             });
         }
-        if (message.content.startsWith("kkwork")) {
+        if (content.startsWith("kkwork")) {
             const availableCards = [...embed.description.matchAll(/\*\*`([^`]+)`\*\*.*\*\*(.+?)\*\*$/gm)].map((match) => ({
                 code: match[1],
                 name: match[2].trim(),

@@ -21,6 +21,7 @@ export default {
         if (!repliedTo) return;
         if (!repliedTo.author.bot || repliedTo.author.id !== Karuta) return;
 
+        const content = message.content.toLowerCase();
         let triggeredByUser = false;
         if (repliedTo.reference) {
             const originalMessage = await message.channel.messages.fetch(repliedTo.reference.messageId!).catch(() => null);
@@ -42,7 +43,7 @@ export default {
         const embed = repliedTo.embeds[0];
         if (!embed?.description) return;
 
-        if (message.content.startsWith("kkscan")) {
+        if (content.startsWith("kkscan")) {
             jobBoardHealthyCards.length = 0;
             const lines = embed.description.split("\n").map((line) => line.trim()).filter(Boolean);
             let foundJobBoard = false;
@@ -101,7 +102,7 @@ export default {
             });
         }
 
-        if (message.content.startsWith("kkwork")) {
+        if (content.startsWith("kkwork")) {
             const availableCards = [...embed.description.matchAll(/\*\*`([^`]+)`\*\*.*\*\*(.+?)\*\*$/gm)].map(
                 (match) => ({
                     code: match[1],

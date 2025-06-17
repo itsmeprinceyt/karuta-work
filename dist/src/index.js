@@ -20,7 +20,9 @@ client.once(discord_js_1.Events.ClientReady, () => {
 });
 const cooldowns = new Map();
 client.on(discord_js_1.Events.MessageCreate, async (message) => {
-    if (message.author.bot || !message.content.startsWith(prefix))
+    if (message.author.bot)
+        return;
+    if (message.content.slice(0, prefix.length).toLowerCase() !== prefix)
         return;
     const args = message.content.slice(prefix.length).trim().split(/ +/);
     const trigger = args.shift()?.toLowerCase();
