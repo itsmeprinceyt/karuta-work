@@ -1,6 +1,6 @@
 # 🤖 Karuta Work - Discord Bot
 
-A helpful utility bot built for the Karuta card game on Discord. It simplifies card management, automates job board assignments, and helps players stay efficient — with style!
+A helpful utility bot built for the Karuta card game on Discord. It simplifies card management, saves time, and helps players stay efficient — with style!
 
 ---
 
