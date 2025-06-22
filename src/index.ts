@@ -1,6 +1,7 @@
 import { Client, GatewayIntentBits, Events, Message } from "discord.js";
 import { config } from "dotenv";
 import msgCommands from "./msgCommandHandler";
+import { buttonHandlers } from "./buttonHandlers";
 
 config();
 
@@ -71,6 +72,20 @@ client.on(Events.MessageCreate, async (message: Message) => {
         await message.reply("There was an error executing that command.");
     }
 });
+
+client.on(Events.InteractionCreate, async (interaction) => {
+    if (!interaction.isButton()) return;
+
+    const handler = buttonHandlers[interaction.customId];
+    if (!handler) return;
+
+    try {
+        await handler(interaction);
+    } catch (error) {
+        console.error(`❌ Failed to handle button "${interaction.customId}":`, error);
+    }
+});
+
 
 
 client.login(process.env.DISCORD_BOT_TOKEN);

@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const discord_js_1 = require("discord.js");
 const dotenv_1 = require("dotenv");
 const msgCommandHandler_1 = __importDefault(require("./msgCommandHandler"));
+const buttonHandlers_1 = require("./buttonHandlers");
 (0, dotenv_1.config)();
 const client = new discord_js_1.Client({
     intents: [
@@ -61,6 +62,19 @@ client.on(discord_js_1.Events.MessageCreate, async (message) => {
     catch (err) {
         console.error(`[ ERROR ] Command "${trigger}" failed for ${username}:`, err);
         await message.reply("There was an error executing that command.");
+    }
+});
+client.on(discord_js_1.Events.InteractionCreate, async (interaction) => {
+    if (!interaction.isButton())
+        return;
+    const handler = buttonHandlers_1.buttonHandlers[interaction.customId];
+    if (!handler)
+        return;
+    try {
+        await handler(interaction);
+    }
+    catch (error) {
+        console.error(`❌ Failed to handle button "${interaction.customId}":`, error);
     }
 });
 client.login(process.env.DISCORD_BOT_TOKEN);
