@@ -22,25 +22,32 @@ exports.default = {
             "🍓 `kkhelp  ` – Shows this help message.\n" +
             "🍓 `kkinvite` – Get the bot invite link.\n" +
             "🍓 `kkscan  ` – Scan your job board and summarize healthy/injured cards.\n" +
-            "🍓 `kkwork  ` – Assign available cards to empty job board slots.");
-        const howItWorksEmbed = new discord_js_1.EmbedBuilder()
+            "🍓 `kkwork  ` – Assign available cards to empty job board slots.\n" +
+            "🍓 `kkbits  ` – Gives you total amount of bits, write (kkbits 2300) for magic.");
+        const how_kkwork_works = new discord_js_1.EmbedBuilder()
             .setColor(Colors_1.COLOR_PRIMARY)
-            .setTitle("⚙️ How It Works")
-            .setDescription("1. Reply to your Job Board embed with `kkscan`\n" +
+            .setTitle("⚙️ How kkscan & kkwork Works")
+            .setDescription("1. Reply to your Job Board embed with `kkscan` for total bits calculation\n" +
             "2. The bot checks which cards are healthy/injured.\n" +
             "3. Reply to the card collection embed with `kkwork` after doing `kc o:eff`\n" +
             "4. It will assign your free cards automatically to empty job slots.")
             .setFooter({ text: "💡 Aliases or nicknamed cards won't be matched during scan." });
+        const how_kkbits_works = new discord_js_1.EmbedBuilder()
+            .setColor(Colors_1.COLOR_PRIMARY)
+            .setTitle("⚙️ How kkbits works")
+            .setDescription("1. Reply to your `kbi` embed with `kkbits`\n" +
+            "2. Reply to your `kbi` embed with `kkbits 2300` to get exact bits for that ratio")
+            .setFooter({ text: "💡 '2300' is an example, you can type any ratio amount." });
         const gifEmbed = new discord_js_1.EmbedBuilder()
             .setColor(Colors_1.YELLOW_EMBED)
-            .setTitle("🐱 Demonstration")
+            .setTitle("🐱 KKSCAN & KKWORK Usage")
             .setImage(`attachment://${utils_1.GIF_NAME}`);
         const gifPath = path_1.default.join(__dirname, utils_1.GIF_LOCATION);
         const gif = new discord_js_1.AttachmentBuilder(gifPath).setName(utils_1.GIF_NAME);
         const { embed: ytEmbed, button: ytButton } = (0, ytPromo_1.YouTubePromoEmbed)();
         try {
             await message.reply({
-                embeds: [mainEmbed, howItWorksEmbed, gifEmbed, ytEmbed],
+                embeds: [mainEmbed, how_kkbits_works, how_kkwork_works, gifEmbed, ytEmbed],
                 files: [gif],
                 components: [ytButton],
             });

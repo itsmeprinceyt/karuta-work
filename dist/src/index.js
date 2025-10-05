@@ -7,6 +7,7 @@ const discord_js_1 = require("discord.js");
 const dotenv_1 = require("dotenv");
 const msgCommandHandler_1 = __importDefault(require("./msgCommandHandler"));
 const buttonHandlers_1 = require("./buttonHandlers");
+const bits_1 = require("./commands/bits");
 (0, dotenv_1.config)();
 const client = new discord_js_1.Client({
     intents: [
@@ -23,7 +24,7 @@ const cooldowns = new Map();
 client.on(discord_js_1.Events.MessageCreate, async (message) => {
     if (message.author.bot)
         return;
-    if (message.content.slice(0, prefix.length).toLowerCase() !== prefix)
+    if (!message.content.toLowerCase().startsWith(prefix))
         return;
     const args = message.content.slice(prefix.length).trim().split(/ +/);
     const trigger = args.shift()?.toLowerCase();
@@ -34,10 +35,7 @@ client.on(discord_js_1.Events.MessageCreate, async (message) => {
         console.warn(`[ WARN ] Unknown command: ${trigger}`);
         return;
     }
-    const username = `${message.author.tag}`;
     const userId = message.author.id;
-    const guildName = message.guild?.name ?? "DMs";
-    const guildId = message.guild?.id ?? "DM";
     const now = Date.now();
     const cooldownData = cooldowns.get(userId);
     if (cooldownData) {
@@ -57,12 +55,19 @@ client.on(discord_js_1.Events.MessageCreate, async (message) => {
     }, 30000);
     try {
         await command.execute(message, args.join(" "));
-        console.log(`\n📥 Log\n-----------\nUser: ${username}\nUUID: ${userId}\nCommand: kk${trigger}\nLocation: ${guildName}\nLocation ID: ${guildId}\n-----------`);
+        console.log(`\n📥 Log\n-----------\nUser: ${message.author.tag}\nUUID: ${userId}\nCommand: kk${trigger}\nLocation: ${message.guild?.name ?? "DMs"}\nLocation ID: ${message.guild?.id ?? "DM"}\n-----------`);
     }
     catch (err) {
-        console.error(`[ ERROR ] Command "${trigger}" failed for ${username}:`, err);
+        console.error(`[ ERROR ] Command "${trigger}" failed for ${message.author.tag}:`, err);
         await message.reply("There was an error executing that command.");
     }
+});
+client.on(discord_js_1.Events.MessageUpdate, async (oldMessage, newMessage) => {
+    if (newMessage.partial)
+        await newMessage.fetch();
+    if (oldMessage.partial)
+        await oldMessage.fetch();
+    await (0, bits_1.handleMessageUpdate)(oldMessage, newMessage);
 });
 client.on(discord_js_1.Events.InteractionCreate, async (interaction) => {
     if (!interaction.isButton())

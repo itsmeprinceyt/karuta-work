@@ -17,7 +17,8 @@ exports.default = {
             .setDescription(`${utils_1.BotName} is a utility bot designed to enhance your Karuta experience.\n\n` +
             "Easily manage your Job Board with simple commands like `kkscan` and `kkwork`.\n" +
             "Speed up card assignments, save time, and stay organized.\n\n" +
-            `💡 Built by <@${utils_1.Creator}> to make your Karuta life easier!\n-# Type \`kkhelp\` to know more!`)
+            `💡 Built by <@${utils_1.Creator}> to make your Karuta life easier!\n-# Type \`kkhelp\` to know more!` +
+            `\n\n**[Invite Now](${utils_1.DISCORD_BOT_INVITE_LINK})**`)
             .setTimestamp();
         const { embed: ytEmbed, button: ytButton } = (0, ytPromo_1.YouTubePromoEmbed)();
         try {

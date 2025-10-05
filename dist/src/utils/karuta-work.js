@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AllCardsHealthyEmbed = AllCardsHealthyEmbed;
+exports.ScanFirst = ScanFirst;
 exports.JobBoardSummary = JobBoardSummary;
 exports.NotTriggeredByYou = NotTriggeredByYou;
 exports.NoJobBoardFound = NoJobBoardFound;
@@ -13,6 +14,11 @@ function AllCardsHealthyEmbed() {
     return new discord_js_1.EmbedBuilder()
         .setColor(Colors_1.COLOR_TRUE)
         .setDescription("✅ All cards on your Job Board are already healthy.");
+}
+function ScanFirst() {
+    return new discord_js_1.EmbedBuilder()
+        .setColor(Colors_1.COLOR_FALSE)
+        .setDescription("You need to scan your job board first using \`kkscan\`");
 }
 function JobBoardSummary(healthyCount, injuredCount) {
     return new discord_js_1.EmbedBuilder()
