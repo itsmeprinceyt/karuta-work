@@ -6,3 +6,5 @@ export const DISCORD_BOT_INVITE_LINK: string = "https://discord.com/oauth2/autho
 export const Creator: string = "310672946316181514";
 export const GIF_LOCATION: string = "../../public/how-to-use.gif";
 export const GIF_NAME: string = "how-to-use.gif";
+export const DORO_GIF_LOCATION: string = "../../public/doro.gif";
+export const DORO_GIF_NAME: string = "doro.gif";

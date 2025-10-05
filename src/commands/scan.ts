@@ -1,17 +1,22 @@
 import { Message, TextChannel, AttachmentBuilder } from "discord.js";
 import path from "path";
-import { Karuta } from '../utils/utils';
-import {
-    AllCardsHealthyEmbed,
-    EmptyJobBoard,
-    NoJobBoardFound,
-    NotTriggeredByYou,
-    NoCardsFound,
-    JobBoardSummary
-} from "../utils/karuta-work";
+import { DORO_GIF_LOCATION, Karuta } from '../utils/utils';
+import { AllCardsHealthyEmbed, EmptyJobBoard, NoJobBoardFound, NotTriggeredByYou, NoCardsFound, JobBoardSummary, ScanFirst } from "../utils/karuta-work";
 import { YouTubePromoEmbed } from "../utils/ytPromo";
+import { UserJobBoardData } from "../types/UserJobBoardData.type";
 
-const jobBoardHealthyCards: { position: string; name: string }[] = [];
+const userJobBoards = new Map<string, UserJobBoardData>();
+
+setInterval(() => {
+    const now = Date.now();
+    const fiveMinutesAgo = now - (5 * 60 * 1000);
+
+    for (const [userId, data] of userJobBoards.entries()) {
+        if (data.timestamp < fiveMinutesAgo) {
+            userJobBoards.delete(userId);
+        }
+    }
+}, 5 * 60 * 1000);
 
 export default {
     triggers: ["scan", "work"],
@@ -43,8 +48,11 @@ export default {
         const embed = repliedTo.embeds[0];
         if (!embed?.description) return;
 
+        const userId = message.author.id;
+
         if (content.startsWith("kkscan")) {
-            jobBoardHealthyCards.length = 0;
+            const healthyCards: { position: string; name: string }[] = [];
+
             const lines = embed.description.split("\n").map((line) => line.trim()).filter(Boolean);
             let foundJobBoard = false;
 
@@ -54,13 +62,13 @@ export default {
                     foundJobBoard = true;
                     const [_, position, name, effort, status] = match;
                     if (status === "Healthy") {
-                        jobBoardHealthyCards.push({ position, name });
+                        healthyCards.push({ position, name });
                     }
                 }
             }
 
             if (!foundJobBoard) {
-                const gifPath = path.join(__dirname, "../public/GIF/silly-cat-silly-car.gif");
+                const gifPath = path.join(__dirname, DORO_GIF_LOCATION);
                 const gif = new AttachmentBuilder(gifPath);
                 await message.reply({
                     embeds: [NoJobBoardFound(), ytEmbed],
@@ -70,7 +78,7 @@ export default {
                 return;
             }
 
-            if (jobBoardHealthyCards.length === 0) {
+            if (healthyCards.length === 0) {
                 const hasCards = lines.some(line =>
                     line.match(/^(🇦|🇧|🇨|🇩|🇪)\s(.+?)\s·\s\*\*(\d+)\*\*\sEffort\s·\s`Injured`/)
                 );
@@ -83,7 +91,12 @@ export default {
                 }
             }
 
-            const healthyCount = jobBoardHealthyCards.length;
+            userJobBoards.set(userId, {
+                healthyCards,
+                timestamp: Date.now()
+            });
+
+            const healthyCount = healthyCards.length;
             const injuredCount = lines.filter(line =>
                 line.match(/^(🇦|🇧|🇨|🇩|🇪)\s(.+?)\s·\s\*\*(\d+)\*\*\sEffort\s·\s`Injured`/)
             ).length;
@@ -103,6 +116,8 @@ export default {
         }
 
         if (content.startsWith("kkwork")) {
+            const userData = userJobBoards.get(userId);
+
             const availableCards = [...embed.description.matchAll(/\*\*`([^`]+)`\*\*.*\*\*(.+?)\*\*$/gm)].map(
                 (match) => ({
                     code: match[1],
@@ -119,28 +134,37 @@ export default {
             }
 
             const allLabels = ["A", "B", "C", "D", "E"];
-            const emojiToLabel: Record<string, string> = {
-                "🇦": "A",
-                "🇧": "B",
-                "🇨": "C",
-                "🇩": "D",
-                "🇪": "E",
-            };
 
-            const usedLabels = jobBoardHealthyCards
-                .map((card) => emojiToLabel[card.position])
-                .filter(Boolean);
+            let availableLabels: string[];
 
-            const availableLabels = allLabels.filter((label) => !usedLabels.includes(label));
+            if (!userData || userData.healthyCards.length === 0) {
+                availableLabels = [...allLabels];
+            } else {
+                const emojiToLabel: Record<string, string> = {
+                    "🇦": "A",
+                    "🇧": "B",
+                    "🇨": "C",
+                    "🇩": "D",
+                    "🇪": "E",
+                };
+
+                const usedLabels = userData.healthyCards
+                    .map((card) => emojiToLabel[card.position])
+                    .filter(Boolean);
+
+                availableLabels = allLabels.filter((label) => !usedLabels.includes(label));
+            }
+
             let labelIndex = 0;
 
             for (const { code, name } of availableCards) {
-                if (jobBoardHealthyCards.some((card) => name.startsWith(card.name))) continue;
+                if (userData && userData.healthyCards.some((card) => name.startsWith(card.name))) continue;
                 if (labelIndex >= availableLabels.length) break;
 
                 const label = availableLabels[labelIndex++];
                 if (message.channel.isTextBased()) {
                     await (message.channel as TextChannel).send(`kjw ${label.toLowerCase()} ${code}`);
+                    await new Promise(resolve => setTimeout(resolve, 500));
                 }
             }
 

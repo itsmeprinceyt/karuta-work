@@ -1,11 +1,17 @@
 import { EmbedBuilder } from "discord.js";
-import { COLOR_TRUE, GOLDEN_EMBED } from "./Colors";
+import { COLOR_FALSE, COLOR_TRUE, GOLDEN_EMBED } from "./Colors";
 import { BotName, DiscordProfileLink } from "./utils";
 
 export function AllCardsHealthyEmbed(): EmbedBuilder {
     return new EmbedBuilder()
         .setColor(COLOR_TRUE)
         .setDescription("✅ All cards on your Job Board are already healthy.");
+}
+
+export function ScanFirst(): EmbedBuilder {
+    return new EmbedBuilder()
+        .setColor(COLOR_FALSE)
+        .setDescription("You need to scan your job board first using \`kkscan\`");
 }
 
 export function JobBoardSummary(healthyCount: number, injuredCount: number): EmbedBuilder {

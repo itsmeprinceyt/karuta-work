@@ -1,7 +1,7 @@
 import { Collection } from "discord.js";
 import { readdirSync } from "fs";
 import { join } from "path";
-import { Command } from "./type/command.type";
+import { Command } from "./types/command.type";
 const commands = new Collection<string, Command>();
 const commandFiles = readdirSync(join(__dirname, "commands")).filter(
   (file) => file.endsWith(".ts") || file.endsWith(".js")

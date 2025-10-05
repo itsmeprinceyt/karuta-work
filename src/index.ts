@@ -2,6 +2,8 @@ import { Client, GatewayIntentBits, Events, Message } from "discord.js";
 import { config } from "dotenv";
 import msgCommands from "./msgCommandHandler";
 import { buttonHandlers } from "./buttonHandlers";
+import { CooldownData } from "./types/cooldown.type";
+import { handleMessageUpdate } from "./commands/bits";
 
 config();
 
@@ -19,12 +21,11 @@ client.once(Events.ClientReady, () => {
     console.log(`✅ Logged in as ${client.user?.tag}`);
 });
 
-const cooldowns = new Map<string, { lastUsed: number, penalty: number }>();
+const cooldowns = new Map<string, CooldownData>();
 
 client.on(Events.MessageCreate, async (message: Message) => {
     if (message.author.bot) return;
-
-    if (message.content.slice(0, prefix.length).toLowerCase() !== prefix) return;
+    if (!message.content.toLowerCase().startsWith(prefix)) return;
 
     const args = message.content.slice(prefix.length).trim().split(/ +/);
     const trigger = args.shift()?.toLowerCase();
@@ -36,11 +37,7 @@ client.on(Events.MessageCreate, async (message: Message) => {
         return;
     }
 
-    const username: string = `${message.author.tag}`;
-    const userId: string = message.author.id;
-    const guildName: string = message.guild?.name ?? "DMs";
-    const guildId: string = message.guild?.id ?? "DM";
-
+    const userId = message.author.id;
     const now = Date.now();
     const cooldownData = cooldowns.get(userId);
 
@@ -66,11 +63,18 @@ client.on(Events.MessageCreate, async (message: Message) => {
 
     try {
         await command.execute(message, args.join(" "));
-        console.log(`\n📥 Log\n-----------\nUser: ${username}\nUUID: ${userId}\nCommand: kk${trigger}\nLocation: ${guildName}\nLocation ID: ${guildId}\n-----------`);
+        console.log(`\n📥 Log\n-----------\nUser: ${message.author.tag}\nUUID: ${userId}\nCommand: kk${trigger}\nLocation: ${message.guild?.name ?? "DMs"}\nLocation ID: ${message.guild?.id ?? "DM"}\n-----------`);
     } catch (err) {
-        console.error(`[ ERROR ] Command "${trigger}" failed for ${username}:`, err);
+        console.error(`[ ERROR ] Command "${trigger}" failed for ${message.author.tag}:`, err);
         await message.reply("There was an error executing that command.");
     }
+});
+
+client.on(Events.MessageUpdate, async (oldMessage, newMessage) => {
+    if (newMessage.partial) await newMessage.fetch();
+    if (oldMessage.partial) await oldMessage.fetch();
+    
+    await handleMessageUpdate(oldMessage as Message, newMessage as Message);
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
