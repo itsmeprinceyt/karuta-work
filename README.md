@@ -10,6 +10,7 @@ A helpful utility bot built for the Karuta card game on Discord. It simplifies c
 - 📨 `kkinvite` – Receive an invite link to add this bot to your server.
 - 🛠️ `kkscan` – Analyze your job board and highlight healthy/injured cards.
 - ⚒️ `kkwork` – Automatically assign available cards to job board slots.
+- ⚒️ `kkbits` – Calculate total bits or custom total bits with selling price, try `kkbits 2300` while replying to kbi embed.
 - 📺 `kkabout` – Learn more about the bot and support its creator.
 - 🕒 Anti-spam cooldown system to avoid abuse (with dynamic timers).
 - 🎥 Embedded YouTube support and visuals with GIFs and rich embeds.
