@@ -7,6 +7,8 @@ export interface UserBitsSession {
     totalPages: number;
     timestamp: number;
     isComplete: boolean;
-    lastMessageId?: string;
     ratio?: number;
+    lastMessageId?: string;
+    sessionId?: string;
+    lastSessionId?: string;
 }

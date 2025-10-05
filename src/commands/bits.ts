@@ -66,13 +66,20 @@ export default {
 
             if (isNaN(parsedRatio) || parsedRatio <= 0) {
                 await message.reply({
-                    embeds: [ InvalidInput() ,ytEmbed],
+                    embeds: [InvalidInput(), ytEmbed],
                     components: [ytButton]
                 });
                 return;
             }
 
             ratio = parsedRatio;
+        }
+
+        const sessionId = `${userId}-${message.id}`;
+
+        const existingSession = userBitsSessions.get(userId);
+        if (existingSession && ratio && existingSession.ratio !== ratio) {
+            userBitsSessions.delete(userId);
         }
 
         let userSession = userBitsSessions.get(userId);
@@ -87,13 +94,15 @@ export default {
                 totalPages: paginationInfo.totalPages,
                 timestamp: Date.now(),
                 isComplete: false,
-                ratio: ratio || undefined
+                ratio: ratio || undefined,
+                sessionId: sessionId
             };
             userBitsSessions.set(userId, userSession);
         } else {
             if (ratio) {
                 userSession.ratio = ratio;
             }
+            userSession.sessionId = sessionId;
         }
 
         for (const [bitName, quantity] of pageData.bits) {
@@ -112,45 +121,40 @@ export default {
             createRatioSummaryText(userSession, userSession.ratio, isLastPage) :
             createFinalBitsSummaryText(userSession, isLastPage);
 
-        if (!isLastPage) {
-            if (userSession.lastMessageId) {
-                try {
-                    const prevMsg = await message.channel.messages.fetch(userSession.lastMessageId);
-                    await prevMsg.edit({
-                        content: summaryText,
-                        embeds: [ytEmbed],
-                        components: [ytButton]
-                    });
-                } catch (err) {
-                    console.error("Failed to edit previous message:", err);
-                }
-            } else {
+        if (userSession.lastMessageId && userSession.lastSessionId === sessionId) {
+            try {
+                const prevMsg = await message.channel.messages.fetch(userSession.lastMessageId);
+                await prevMsg.edit({
+                    content: summaryText,
+                    embeds: [ytEmbed],
+                    components: [ytButton]
+                });
+            } catch (err) {
+                console.error("Failed to edit previous message:", err);
                 const sent = await message.reply({
                     content: summaryText,
                     embeds: [ytEmbed],
                     components: [ytButton]
                 });
                 userSession.lastMessageId = sent.id;
-            }
-            return;
-        }
-
-        userSession.isComplete = true;
-        if (userSession.lastMessageId) {
-            try {
-                const prevMsg = await message.channel.messages.fetch(userSession.lastMessageId);
-                await prevMsg.edit(summaryText);
-            } catch (err) {
-                console.error("Failed to edit final message:", err);
-                await message.reply(summaryText);
+                userSession.lastSessionId = sessionId;
             }
         } else {
-            await message.reply(summaryText);
+            const sent = await message.reply({
+                content: summaryText,
+                embeds: [ytEmbed],
+                components: [ytButton]
+            });
+            userSession.lastMessageId = sent.id;
+            userSession.lastSessionId = sessionId;
         }
 
-        setTimeout(() => {
-            userBitsSessions.delete(userId);
-        }, 30000);
+        if (isLastPage) {
+            userSession.isComplete = true;
+            setTimeout(() => {
+                userBitsSessions.delete(userId);
+            }, 30000);
+        }
     },
 };
 
