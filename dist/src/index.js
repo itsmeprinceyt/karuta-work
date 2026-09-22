@@ -18,7 +18,7 @@ const client = new discord_js_1.Client({
 });
 const prefix = "kk";
 client.once(discord_js_1.Events.ClientReady, () => {
-    console.log(`✅ Logged in as ${client.user?.tag}`);
+    console.log(`[ READY ] Logged in as ${client.user?.tag} (${client.user?.id})`);
 });
 const cooldowns = new Map();
 client.on(discord_js_1.Events.MessageCreate, async (message) => {
@@ -32,7 +32,7 @@ client.on(discord_js_1.Events.MessageCreate, async (message) => {
         return;
     const command = msgCommandHandler_1.default.get(trigger);
     if (!command) {
-        console.warn(`[ WARN ] Unknown command: ${trigger}`);
+        console.warn(`[ WARN ] Unknown command: kk${trigger} (user: ${message.author.tag})`);
         return;
     }
     const userId = message.author.id;
@@ -45,6 +45,7 @@ client.on(discord_js_1.Events.MessageCreate, async (message) => {
             cooldownData.lastUsed = now;
             cooldowns.set(userId, cooldownData);
             const unixTime = Math.floor((cooldownData.lastUsed + cooldownData.penalty) / 1000);
+            console.warn(`[ COOLDOWN ] ${message.author.tag} hit cooldown on kk${trigger} (penalty now ${cooldownData.penalty}ms)`);
             await message.reply(`⏳ You can use the command again <t:${unixTime}:R>`);
             return;
         }
@@ -53,13 +54,18 @@ client.on(discord_js_1.Events.MessageCreate, async (message) => {
     setTimeout(() => {
         cooldowns.delete(userId);
     }, 30000);
+    const startTime = Date.now();
     try {
         await command.execute(message, args.join(" "));
-        console.log(`\n📥 Log\n-----------\nUser: ${message.author.tag}\nUUID: ${userId}\nCommand: kk${trigger}\nLocation: ${message.guild?.name ?? "DMs"}\nLocation ID: ${message.guild?.id ?? "DM"}\n-----------`);
+        const elapsed = Date.now() - startTime;
+        console.log(`[ CMD ] kk${trigger} | ${message.author.tag} (${userId}) | ` +
+            `${message.guild?.name ?? "DMs"} (${message.guild?.id ?? "DM"}) | ${elapsed}ms`);
     }
     catch (err) {
-        console.error(`[ ERROR ] Command "${trigger}" failed for ${message.author.tag}:`, err);
-        await message.reply("There was an error executing that command.");
+        console.error(`[ ERROR ] Command "kk${trigger}" failed for ${message.author.tag}:`, err);
+        await message
+            .reply("There was an error executing that command.")
+            .catch(() => { });
     }
 });
 client.on(discord_js_1.Events.MessageUpdate, async (oldMessage, newMessage) => {
@@ -79,7 +85,7 @@ client.on(discord_js_1.Events.InteractionCreate, async (interaction) => {
         await handler(interaction);
     }
     catch (error) {
-        console.error(`❌ Failed to handle button "${interaction.customId}":`, error);
+        console.error(`[ ERROR ] Failed to handle button "${interaction.customId}":`, error);
     }
 });
 client.login(process.env.DISCORD_BOT_TOKEN);
