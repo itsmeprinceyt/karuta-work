@@ -2,12 +2,17 @@
   "compilerOptions": {
     "rootDir": ".",
     "outDir": "dist",
-    "module": "commonjs",
+    "module": "node16",
+    "moduleResolution": "node16",
     "target": "ES2020",
-    "moduleResolution": "node",
     "esModuleInterop": true,
     "strict": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "forceConsistentCasingInFileNames": true
   },
-  "include": ["src", "copyAssets.ts"]
+  "include": [
+    "src",
+    "copyAssets.ts"
+  ]
 }
