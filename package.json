@@ -2,11 +2,12 @@
   "name": "karuta-work",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/src/index.js",
+  "type": "commonjs",
   "scripts": {
     "dev": "nodemon --watch src --ext ts --exec tsx src/index.ts",
     "build": "tsc && node dist/copyAssets.js",
-    "start": "tsc && node dist/src/index.js"
+    "start": "node dist/src/index.js"
   },
   "repository": {
     "type": "git",
@@ -19,6 +20,9 @@
     "url": "https://github.com/itsmeprinceyt/karuta-work/issues"
   },
   "homepage": "https://github.com/itsmeprinceyt/karuta-work#readme",
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
     "discord.js": "^14.20.0",
     "dotenv": "^16.5.0"
@@ -26,8 +30,7 @@
   "devDependencies": {
     "@types/node": "^24.0.3",
     "nodemon": "^3.1.10",
-    "ts-node": "^10.9.2",
-    "tsx": "^4.20.3",
-    "typescript": "^5.8.3"
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.0"
   }
 }
