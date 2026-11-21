@@ -32,5 +32,8 @@
     "nodemon": "^3.1.10",
     "tsx": "^4.23.15",
     "typescript": "^5.9.0"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
   }
 }
